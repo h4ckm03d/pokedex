@@ -1,0 +1,29 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "github.com/h4ckm03d/pokedex/frontend",
+  "author": "Moch. Lutfi",
+  "license": "MIT",
+  "private": true,
+  "browserslist": [
+    "last 1 chrome versions"
+  ],
+  "scripts": {
+    "fmt": "prettier --write README.md 'src/**/*.js' 'src/**/*.js' 'src/**/*.{js,svelte}'",
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-svelte": "^4.0.5",
+    "sass": "^1.25.0",
+    "svelte": "^3.17.2",
+    "eslint": "^6.0.1",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "1.19.1",
+    "prettier-plugin-svelte": "^0.6.0"
+  }
+}
