@@ -33,6 +33,8 @@ func (r *Request) QueryParams() url.Values {
 
 	if r.PageSize > 0 {
 		q.Add("pageSize", strconv.Itoa(r.PageSize))
+	} else {
+		q.Add("pageSize", strconv.Itoa(10))
 	}
 
 	if r.Types != "" {
