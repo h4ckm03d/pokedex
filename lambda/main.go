@@ -125,7 +125,14 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	//Returning response with AWS Lambda Proxy Response
-	return events.APIGatewayProxyResponse{Body: string(response), StatusCode: 200}, nil
+	return events.APIGatewayProxyResponse{
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin":      "*",    // (* or a specific host)
+			"Access-Control-Allow-Credentials": "true", // Required for cookies, authorization headers with HTTPS
+		},
+		Body:       string(response),
+		StatusCode: 200,
+	}, nil
 }
 
 func main() {

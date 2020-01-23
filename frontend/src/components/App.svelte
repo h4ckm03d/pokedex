@@ -11,14 +11,24 @@
 
   async function fetchData() {
     const res = await fetch(
-      `https://api.pokemontcg.io/v1/cards?pageSize=10&name=${query}`
+      `https://0e8hk047l4.execute-api.ap-southeast-1.amazonaws.com/demo?pageSize=10&name=${query}`,
+      {
+        method: "GET", // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors'
+      }
     );
-    const payload = await res.json();
-    cards = payload.cards;
+    cards = await res.json();
+  }
+  function enterSearch(event) {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13) {
+      // Cancel the default action, if needed
+      event.preventDefault();
+      fetchData();
+    }
   }
 
   function searchClick() {
-    console.log("klicked", query)
     fetchData();
   }
 </script>
@@ -26,8 +36,6 @@
 <style>
   .container {
     display: grid;
-    /* grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
-   grid-gap: 20px; */
   }
 </style>
 
@@ -41,25 +49,26 @@
 </section>
 <hr />
 <div class="container">
-  <div class="field has-addons">
-    <p class="control">
-      <input
-        id="search-input-text"
-        class="input"
-        bind:value={query}
-        placeholder="Filter by name, types" />
-    </p>
-    <p class="control">
-    <button class="button" on:click={searchClick}>
-      <span class="icon icon-input-search">
-        <i class="fas fa-search" />
-      </span>
-      <span>Search</span>
-    </button>
-  </p>
+  <div class="column">
+    <div class="field has-addons">
+      <p class="control is-expanded">
+        <input
+          id="search-input-text"
+          class="input"
+          type="text"
+          bind:value={query}
+          on:keyup={enterSearch}
+          placeholder="Filter by name" />
+      </p>
+      <p class="control">
+        <button class="button is-primary" on:click={searchClick}>
+          <span>Search</span>
+        </button>
+      </p>
+    </div>
   </div>
   {#each cards as card}
-    <CardInfo card={card} />
+    <CardInfo {card} />
     <hr />
   {:else}
     <!-- this block renders when cards.length === 0 -->
