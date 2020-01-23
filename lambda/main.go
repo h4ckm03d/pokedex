@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -87,31 +87,45 @@ type Card struct {
 	} `json:"weaknesses"`
 }
 
-func Handler(ctx context.Context, request Request) ([]Card, error) {
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	url := fmt.Sprintf(API)
 
 	client := &http.Client{}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return []Card{}, ErrorBackend
+		return events.APIGatewayProxyResponse{Body: ErrorBackend.Error(), StatusCode: 400}, nil
 	}
 
-	q := request.QueryParams()
-	req.URL.RawQuery = q.Encode()
+	page, _ := strconv.Atoi(request.QueryStringParameters["page"])
+	pageSize, _ := strconv.Atoi(request.QueryStringParameters["pageSize"])
+	//Get the path parameter that was sent
+	q := Request{
+		Name:     request.QueryStringParameters["name"],
+		Types:    request.QueryStringParameters["types"],
+		Page:     page,
+		PageSize: pageSize,
+	}
+	req.URL.RawQuery = q.QueryParams().Encode()
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return []Card{}, ErrorBackend
+		return events.APIGatewayProxyResponse{Body: ErrorBackend.Error(), StatusCode: 400}, nil
 	}
 	defer resp.Body.Close()
 
 	var data CardsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return []Card{}, ErrorBackend
+		return events.APIGatewayProxyResponse{Body: ErrorBackend.Error(), StatusCode: 400}, nil
 	}
 
-	return data.Cards, nil
+	response, err := json.Marshal(&data.Cards)
+	if err != nil {
+		return events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 404}, nil
+	}
+
+	//Returning response with AWS Lambda Proxy Response
+	return events.APIGatewayProxyResponse{Body: string(response), StatusCode: 200}, nil
 }
 
 func main() {
